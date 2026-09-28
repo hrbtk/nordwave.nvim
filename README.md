@@ -1,6 +1,6 @@
 <div align="center">
 
-# My Theme
+# Nord Wave
 
 <br/>
 <br/>
