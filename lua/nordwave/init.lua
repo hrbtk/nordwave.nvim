@@ -48,7 +48,7 @@ local function set_groups()
     Cursor = { fg = colorscheme.editorBackground, bg = colorscheme.mainText },
     lCursor = { link = 'Cursor' },
     CursorIM = { link = 'Cursor' },
-    CursorLine = { bg = colorscheme.popupBackground },
+    CursorLine = { bg = colorscheme.cursorLineBackground },
     CursorColumn = { link = 'CursorLine' },
     Directory = { fg = colorscheme.syntaxFunction },
     DiffAdd = { bg = bg, fg = diff_add },

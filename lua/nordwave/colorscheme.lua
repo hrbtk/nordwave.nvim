@@ -1,7 +1,7 @@
 local config = require 'nordwave.config'
 
 -- Nord Wave Palette
-local nord = {
+local nordwave = {
   black = "#3b4252",
   red = "#bf616a",
   green = "#a3be8c",
@@ -10,6 +10,7 @@ local nord = {
   purple = "#b48ead",
   cyan = "#88c0d0",
   white = "#e5e9f0",
+  midBlack = "#2a2a2a",
   brightBlack = "#4c566a",
   brightRed = "#bf616a",
   brightGreen = "#a3be8c",
@@ -25,51 +26,52 @@ local nord = {
 }
 
 local colorscheme = {
-  standardWhite = nord.brightWhite,
-  standardBlack = nord.background,
+  standardWhite = nordwave.brightWhite,
+  standardBlack = nordwave.background,
 }
 
 if vim.o.background == 'light' then
   -- Add your light theme mapping here...
 else
   -- UI Backgrounds
-  colorscheme.editorBackground = config.transparent and 'none' or nord.background
-  colorscheme.sidebarBackground = nord.black
-  colorscheme.popupBackground = nord.brightBlack
-  colorscheme.floatingWindowBackground = nord.black
-  colorscheme.menuOptionBackground = nord.black
+  colorscheme.editorBackground = config.transparent and 'none' or nordwave.background
+  colorscheme.sidebarBackground = nordwave.black
+  colorscheme.popupBackground = nordwave.brightBlack
+  colorscheme.floatingWindowBackground = nordwave.black
+  colorscheme.menuOptionBackground = nordwave.black
+  colorscheme.cursorLineBackground = nordwave.midBlack
 
   -- Foreground & Text Grays
-  colorscheme.mainText = nord.foreground
-  colorscheme.emphasisText = nord.brightWhite
-  colorscheme.commandText = nord.white
-  colorscheme.inactiveText = nord.brightBlack
-  colorscheme.disabledText = nord.black
-  colorscheme.lineNumberText = nord.brightBlack
-  colorscheme.selectedText = nord.selectionBackground
-  colorscheme.inactiveSelectionText = nord.brightBlack
-  colorscheme.foregroundEmphasis = nord.brightWhite
-  colorscheme.terminalGray = nord.brightBlack
+  colorscheme.mainText = nordwave.foreground
+  colorscheme.emphasisText = nordwave.brightWhite
+  colorscheme.commandText = nordwave.white
+  colorscheme.inactiveText = nordwave.brightBlack
+  colorscheme.disabledText = nordwave.black
+  colorscheme.lineNumberText = nordwave.brightBlack
+  colorscheme.selectedText = nordwave.selectionBackground
+  colorscheme.inactiveSelectionText = nordwave.brightBlack
+  colorscheme.foregroundEmphasis = nordwave.brightWhite
+  colorscheme.terminalGray = nordwave.brightBlack
 
   -- Borders
-  colorscheme.windowBorder = nord.black
-  colorscheme.focusedBorder = nord.brightBlack
-  colorscheme.emphasizedBorder = nord.cyan -- Cyan makes a great active border color in Nord
+  colorscheme.windowBorder = nordwave.black
+  colorscheme.focusedBorder = nordwave.brightBlack
+  colorscheme.emphasizedBorder = nordwave.cyan -- Cyan makes a great active border color in Nord
 
   -- Syntax & Diagnostics
-  colorscheme.syntaxFunction = nord.blue
-  colorscheme.syntaxKeyword = nord.purple
-  colorscheme.specialKeyword = nord.brightCyan
-  colorscheme.stringText = nord.green
-  colorscheme.commentText = nord.brightBlack
-  colorscheme.syntaxOperator = nord.white
-  colorscheme.linkText = nord.cyan
+  colorscheme.syntaxFunction = nordwave.blue
+  colorscheme.syntaxKeyword = nordwave.purple
+  colorscheme.specialKeyword = nordwave.brightCyan
+  colorscheme.stringText = nordwave.green
+  colorscheme.commentText = nordwave.brightBlack
+  colorscheme.syntaxOperator = nordwave.white
+  colorscheme.linkText = nordwave.cyan
 
-  colorscheme.errorText = nord.red
-  colorscheme.syntaxError = nord.brightRed
-  colorscheme.warningText = nord.yellow
-  colorscheme.warningEmphasis = nord.brightYellow
-  colorscheme.successText = nord.green
+  colorscheme.errorText = nordwave.red
+  colorscheme.syntaxError = nordwave.brightRed
+  colorscheme.warningText = nordwave.yellow
+  colorscheme.warningEmphasis = nordwave.brightYellow
+  colorscheme.successText = nordwave.green
 end
 
 return colorscheme

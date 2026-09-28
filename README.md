@@ -26,6 +26,12 @@
 use 'hrbtk/nordwave.nvim'
 ```
 
+3. Using `vim.pack()`:
+
+```lua
+vim.pack.add("https://github.com/hrbtk/nordwave.nvim")
+```
+
 ## Configuration
 
 To configure the plugin, you can call require('nordwave').setup({}), passing the table with the values in it. The following are the **defaults**:
@@ -62,12 +68,6 @@ require('bufferline').setup({
     highlights = require('nordwave').bufferline.highlights,
 })
 ```
-
-## Contributing
-
-Contributions are welcome, please open an issue if you encounter any bug or if you find any improvements are needed for the code, also feel free to open a PR.
-
-Take a look at the [Development Guide](./DEVELOPMENT_GUIDE.md)
 
 ## License
 
