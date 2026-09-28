@@ -1,5 +1,5 @@
-local colorscheme = require 'my-theme.colorscheme'
-local config = require 'my-theme.config'
+local colorscheme = require 'nordwave.colorscheme'
+local config = require 'nordwave.config'
 local theme = {}
 
 local bg = config.transparent and 'NONE' or colorscheme.editorBackground
