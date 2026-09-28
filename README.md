@@ -5,7 +5,7 @@
 <br/>
 <br/>
 
-![preview](./assets/sample-preview.png)
+![preview](./assets/preview.png)
 
 <br/>
 <br/>
