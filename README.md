@@ -69,6 +69,11 @@ require('bufferline').setup({
 })
 ```
 
+## Credits
+
+Built on top of [nvim-colorscheme-template](https://github.com/datsfilipe/nvim-colorscheme-template) from [datsfilipe](https://github.com/datsfilipe).
+Inspired by [Nord Wave](https://term.const.net/en/themes/nord-wave/) colorscheme.
+
 ## License
 
 [MIT License](LICENSE)
