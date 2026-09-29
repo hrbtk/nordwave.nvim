@@ -1,2 +1,2 @@
 vim.o.background = "dark"
-require("nordwave").colorscheme()
+require("nordwave").colorscheme("nordwave-dark")

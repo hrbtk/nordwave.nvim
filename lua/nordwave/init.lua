@@ -1,346 +1,354 @@
 local bufferline = require 'nordwave.integrations.bufferline'
 local cmp = require 'nordwave.integrations.cmp'
-local colorscheme = require 'nordwave.colorscheme'
 local config = require 'nordwave.config'
 local utils = require 'nordwave.utils'
 local theme = {}
 
-local function set_terminal_colors()
-    vim.g.terminal_color_0 = colorscheme.editorBackground
-    vim.g.terminal_color_1 = colorscheme.syntaxError
-    vim.g.terminal_color_2 = colorscheme.successText
-    vim.g.terminal_color_3 = colorscheme.warningEmphasis
-    vim.g.terminal_color_4 = colorscheme.syntaxFunction
-    vim.g.terminal_color_5 = colorscheme.syntaxKeyword
-    vim.g.terminal_color_6 = colorscheme.linkText
-    vim.g.terminal_color_7 = colorscheme.mainText
-    vim.g.terminal_color_8 = colorscheme.inactiveText
-    vim.g.terminal_color_9 = colorscheme.errorText
-    vim.g.terminal_color_10 = colorscheme.stringText
-    vim.g.terminal_color_11 = colorscheme.warningText
-    vim.g.terminal_color_12 = colorscheme.syntaxOperator
-    vim.g.terminal_color_13 = colorscheme.syntaxError
-    vim.g.terminal_color_14 = colorscheme.stringText
-    vim.g.terminal_color_15 = colorscheme.commentText
-    vim.g.terminal_color_background = colorscheme.editorBackground
-    vim.g.terminal_color_foreground = colorscheme.mainText
+local function set_terminal_colors(c)
+    for i, color in ipairs(c.terminal) do
+        vim.g['terminal_color_' .. (i - 1)] = color
+    end
+    vim.g.terminal_color_background = c.bg
+    vim.g.terminal_color_foreground = c.fg
 end
 
-local function set_groups()
-    local bg = config.transparent and 'NONE' or colorscheme.editorBackground
-    local diff_add =
-        utils.shade(colorscheme.successText, 0.5, colorscheme.editorBackground)
-    local diff_delete =
-        utils.shade(colorscheme.syntaxError, 0.5, colorscheme.editorBackground)
-    local diff_change =
-        utils.shade(colorscheme.syntaxFunction, 0.5, colorscheme.editorBackground)
-    local diff_text =
-        utils.shade(colorscheme.warningEmphasis, 0.5, colorscheme.editorBackground)
+local function set_groups(c)
+    local bg = config.transparent and 'NONE' or c.bg
+    local function tint(color, alpha)
+        return utils.mix(color, c.bg, alpha)
+    end
 
     local groups = {
-        -- base
-        Normal = { fg = colorscheme.mainText, bg = bg },
-        LineNr = { fg = colorscheme.lineNumberText },
-        ColorColumn = {
-            bg = utils.shade(colorscheme.linkText, 0.5, colorscheme.editorBackground),
-        },
-        Conceal = {},
-        Cursor = { fg = colorscheme.editorBackground, bg = colorscheme.mainText },
+        ------------------------------------------------------------------------
+        -- Editor UI
+        ------------------------------------------------------------------------
+
+        -- Windows
+        Normal = { fg = c.fg, bg = bg },
+        NormalNC = { link = 'Normal' },
+        VertSplit = { fg = c.border, bg = bg },
+        WinSeparator = { link = 'VertSplit' },
+        WinBar = { fg = c.fg, bg = bg },
+        WinBarNC = { fg = c.fg_muted, bg = bg },
+
+        -- Cursor
+        Cursor = { fg = c.bg, bg = c.cursor },
         lCursor = { link = 'Cursor' },
         CursorIM = { link = 'Cursor' },
-        CursorLine = { bg = colorscheme.cursorLineBackground },
-        CursorColumn = { link = 'CursorLine' },
-        Directory = { fg = colorscheme.syntaxFunction },
-        DiffAdd = { bg = bg, fg = diff_add },
-        DiffChange = { bg = bg, fg = diff_change },
-        DiffDelete = { bg = bg, fg = diff_delete },
-        DiffText = { bg = bg, fg = diff_text },
-        EndOfBuffer = { fg = colorscheme.syntaxKeyword },
         TermCursor = { link = 'Cursor' },
-        TermCursorNC = { link = 'Cursor' },
-        ErrorMsg = { fg = colorscheme.syntaxError },
-        VertSplit = { fg = colorscheme.windowBorder, bg = bg },
-        Winseparator = { link = 'VertSplit' },
+        TermCursorNC = { fg = c.bg, bg = c.fg_muted },
+        CursorLine = { bg = c.bg_line },
+        CursorColumn = { link = 'CursorLine' },
+
+        -- Gutter & columns
+        LineNr = { fg = c.fg_subtle },
+        CursorLineNr = { fg = c.accent },
         SignColumn = { link = 'Normal' },
-        Folded = { fg = colorscheme.mainText, bg = colorscheme.popupBackground },
-        FoldColumn = { link = 'SignColumn' },
-        IncSearch = {
-            bg = utils.mix(
-                colorscheme.syntaxFunction,
-                colorscheme.editorBackground,
-                math.abs(0.30)
-            ),
-            fg = colorscheme.editorBackground,
-        },
+        FoldColumn = { fg = c.fg_subtle, bg = bg },
+        ColorColumn = { bg = c.bg_line },
+
+        -- Buffer text
+        Conceal = { fg = c.fg_muted },
+        Directory = { fg = c.func },
+        EndOfBuffer = { fg = c.fg_faint },
+        Folded = { fg = c.fg_muted, bg = c.bg_alt },
+        MatchParen = { fg = c.accent, bg = c.bg_highlight, bold = true },
+        NonText = { fg = c.fg_faint },
+        SpecialKey = { fg = c.fg_faint },
+        Title = { fg = c.func, bold = true },
+        Whitespace = { fg = c.fg_faint },
+
+        -- Search & selection
+        Search = { fg = c.fg, bg = tint(c.accent, 0.25) },
+        CurSearch = { link = 'IncSearch' },
+        IncSearch = { fg = c.bg, bg = c.accent },
         Substitute = { link = 'IncSearch' },
-        CursorLineNr = { fg = colorscheme.commentText },
-        MatchParen = { fg = colorscheme.syntaxError, bg = bg },
-        ModeMsg = { link = 'Normal' },
-        MsgArea = { link = 'Normal' },
-        -- MsgSeparator = {},
-        MoreMsg = { fg = colorscheme.syntaxFunction },
-        NonText = { fg = utils.shade(colorscheme.editorBackground, 0.30) },
-        NormalFloat = { bg = colorscheme.floatingWindowBackground },
-        FloatBorder = { bg = colorscheme.floatingWindowBackground, fg = colorscheme.windowBorder },
-        NormalNC = { link = 'Normal' },
-        Pmenu = { link = 'NormalFloat' },
-        PmenuSel = { bg = colorscheme.menuOptionBackground },
-        PmenuSbar = {
-            bg = utils.shade(
-                colorscheme.syntaxFunction,
-                0.5,
-                colorscheme.editorBackground
-            ),
-        },
-        PmenuThumb = { bg = utils.shade(colorscheme.editorBackground, 0.20) },
-        Question = { fg = colorscheme.syntaxFunction },
-        QuickFixLine = { fg = colorscheme.syntaxFunction },
-        SpecialKey = { fg = colorscheme.syntaxOperator },
-        StatusLine = { fg = colorscheme.mainText, bg = bg },
-        StatusLineNC = {
-            fg = colorscheme.inactiveText,
-            bg = colorscheme.sidebarBackground,
-        },
-        TabLine = {
-            bg = colorscheme.sidebarBackground,
-            fg = colorscheme.inactiveText,
-        },
-        TabLineFill = { link = 'TabLine' },
-        TabLineSel = {
-            bg = colorscheme.editorBackground,
-            fg = colorscheme.emphasisText,
-        },
-        Search = { bg = utils.shade(colorscheme.stringText, 0.40, colorscheme.editorBackground) },
-        SpellBad = { undercurl = true, sp = colorscheme.syntaxError },
-        SpellCap = { undercurl = true, sp = colorscheme.syntaxFunction },
-        SpellLocal = { undercurl = true, sp = colorscheme.syntaxKeyword },
-        SpellRare = { undercurl = true, sp = colorscheme.warningText },
-        Title = { fg = colorscheme.syntaxFunction },
-        Visual = {
-            bg = utils.shade(
-                colorscheme.syntaxFunction,
-                0.40,
-                colorscheme.editorBackground
-            ),
-        },
+        Visual = { bg = tint(c.selection, 0.20) },
         VisualNOS = { link = 'Visual' },
-        WarningMsg = { fg = colorscheme.warningText },
-        Whitespace = { fg = colorscheme.syntaxOperator },
-        WildMenu = { bg = colorscheme.menuOptionBackground },
-        Comment = {
-            fg = colorscheme.commentText,
-            italic = config.italics.comments or false,
-        },
+        QuickFixLine = { bg = c.bg_highlight, bold = true },
 
-        Constant = { fg = colorscheme.syntaxError },
-        String = {
-            fg = colorscheme.stringText,
-            italic = config.italics.strings or false,
-        },
-        Character = { fg = colorscheme.stringText },
-        Number = { fg = colorscheme.foregroundEmphasis, bold = true },
-        Boolean = { fg = colorscheme.syntaxFunction },
+        -- Floating windows & popup menu
+        NormalFloat = { fg = c.fg, bg = c.bg_alt },
+        FloatBorder = { fg = c.border, bg = c.bg_alt },
+        FloatTitle = { fg = c.accent, bg = c.bg_alt, bold = true },
+        FloatFooter = { fg = c.fg_muted, bg = c.bg_alt },
+        Pmenu = { link = 'NormalFloat' },
+        PmenuSel = { fg = c.fg_emphasis, bg = c.bg_highlight, bold = true },
+        PmenuKind = { fg = c.func, bg = c.bg_alt },
+        PmenuKindSel = { fg = c.func, bg = c.bg_highlight, bold = true },
+        PmenuExtra = { fg = c.fg_muted, bg = c.bg_alt },
+        PmenuExtraSel = { fg = c.fg_muted, bg = c.bg_highlight },
+        PmenuMatch = { fg = c.accent, bg = c.bg_alt, bold = true },
+        PmenuMatchSel = { fg = c.accent, bg = c.bg_highlight, bold = true },
+        PmenuSbar = { bg = c.bg_alt },
+        PmenuThumb = { bg = c.border },
+        WildMenu = { link = 'PmenuSel' },
+
+        -- Statusline & tabline
+        StatusLine = { fg = c.fg, bg = bg },
+        StatusLineNC = { fg = c.fg_muted, bg = c.bg_alt },
+        StatusLineTerm = { link = 'StatusLine' },
+        StatusLineTermNC = { link = 'StatusLineNC' },
+        TabLine = { fg = c.fg_muted, bg = c.bg_alt },
+        TabLineFill = { link = 'TabLine' },
+        TabLineSel = { fg = c.fg_emphasis, bg = c.bg },
+
+        -- Messages
+        ModeMsg = { fg = c.fg, bold = true },
+        MsgArea = { link = 'Normal' },
+        MsgSeparator = { link = 'WinSeparator' },
+        MoreMsg = { fg = c.func },
+        Question = { fg = c.func },
+        ErrorMsg = { fg = c.error },
+        WarningMsg = { fg = c.warning },
+
+        -- Diff
+        DiffAdd = { bg = tint(c.added, 0.20) },
+        DiffChange = { bg = tint(c.changed, 0.15) },
+        DiffDelete = { fg = tint(c.removed, 0.60), bg = tint(c.removed, 0.20) },
+        DiffText = { bg = tint(c.changed, 0.35) },
+        Added = { fg = c.added },
+        Changed = { fg = c.changed },
+        Removed = { fg = c.removed },
+
+        -- Spelling
+        SpellBad = { undercurl = true, sp = c.error },
+        SpellCap = { undercurl = true, sp = c.warning },
+        SpellLocal = { undercurl = true, sp = c.info },
+        SpellRare = { undercurl = true, sp = c.hint },
+
+        ------------------------------------------------------------------------
+        -- Syntax (:h group-name)
+        ------------------------------------------------------------------------
+
+        Comment = { fg = c.fg_muted, italic = config.italics.comments or false },
+
+        -- Constants
+        Constant = { fg = c.constant },
+        String = { fg = c.string, italic = config.italics.strings or false },
+        Character = { fg = c.string },
+        Number = { fg = c.constant },
         Float = { link = 'Number' },
+        Boolean = { fg = c.constant },
 
-        Identifier = { fg = colorscheme.mainText },
-        Function = { fg = colorscheme.syntaxKeyword },
-        Method = { fg = colorscheme.syntaxKeyword },
-        Property = { fg = colorscheme.syntaxFunction },
-        Field = { link = 'Property' },
-        Parameter = { fg = colorscheme.mainText },
-        Statement = { fg = colorscheme.syntaxError },
-        Conditional = { fg = colorscheme.syntaxError },
-        -- Repeat = {},
-        Label = { fg = colorscheme.syntaxFunction },
-        Operator = { fg = colorscheme.syntaxError },
-        Keyword = { link = 'Statement', italic = config.italics.keywords or false },
-        Exception = { fg = colorscheme.syntaxError },
+        -- Identifiers & functions
+        Identifier = { fg = c.fg },
+        Function = { fg = c.func, italic = config.italics.functions or false },
 
-        PreProc = { link = 'Keyword' },
-        -- Include = {},
-        Define = { fg = colorscheme.syntaxKeyword },
-        Macro = { link = 'Define' },
-        PreCondit = { fg = colorscheme.syntaxError },
+        -- Statements
+        Statement = { fg = c.keyword },
+        Conditional = { link = 'Keyword' },
+        Repeat = { link = 'Keyword' },
+        Label = { fg = c.keyword },
+        Operator = { fg = c.fg_dim },
+        Keyword = { fg = c.keyword, italic = config.italics.keywords or false },
+        Exception = { link = 'Keyword' },
 
-        Type = { fg = colorscheme.syntaxKeyword },
-        Struct = { link = 'Type' },
-        Class = { link = 'Type' },
+        -- Preprocessor
+        PreProc = { fg = c.keyword },
+        Include = { link = 'Keyword' },
+        Define = { fg = c.keyword },
+        Macro = { fg = c.special },
+        PreCondit = { fg = c.keyword },
 
-        -- StorageClass = {},
-        -- Structure = {},
-        -- Typedef = {},
+        -- Types
+        Type = { fg = c.type },
+        StorageClass = { link = 'Keyword' },
+        Structure = { link = 'Type' },
+        Typedef = { link = 'Type' },
 
-        Attribute = { link = 'Character' },
-        Punctuation = { fg = colorscheme.syntaxOperator },
-        Special = { fg = colorscheme.syntaxOperator },
+        -- Specials
+        Special = { fg = c.special },
+        SpecialChar = { fg = c.special },
+        Tag = { fg = c.func },
+        Delimiter = { fg = c.fg_dim },
+        SpecialComment = { fg = c.fg_muted, bold = true },
+        Debug = { fg = c.special },
 
-        SpecialChar = { fg = colorscheme.syntaxError },
-        Tag = { fg = colorscheme.stringText },
-        Delimiter = { fg = colorscheme.syntaxOperator },
-        -- SpecialComment = {},
-        Debug = { fg = colorscheme.specialKeyword },
-
+        -- Misc
         Underlined = { underline = true },
         Bold = { bold = true },
         Italic = { italic = true },
-        Ignore = { fg = colorscheme.editorBackground },
-        Error = { link = 'ErrorMsg' },
-        Todo = { fg = colorscheme.warningText, bold = true },
+        Ignore = { fg = c.fg_faint },
+        Error = { fg = c.error },
+        Todo = { fg = c.accent, bold = true },
 
-        -- LspReferenceText = {},
-        -- LspReferenceRead = {},
-        -- LspReferenceWrite = {},
-        -- LspCodeLens = {},
-        -- LspCodeLensSeparator = {},
-        -- LspSignatureActiveParameter = {},
+        ------------------------------------------------------------------------
+        -- LSP
+        ------------------------------------------------------------------------
 
-        DiagnosticError = { link = 'Error' },
-        DiagnosticWarn = { link = 'WarningMsg' },
-        DiagnosticInfo = { fg = colorscheme.syntaxFunction },
-        DiagnosticHint = { fg = colorscheme.warningEmphasis },
-        DiagnosticVirtualTextError = { link = 'DiagnosticError' },
-        DiagnosticVirtualTextWarn = { link = 'DiagnosticWarn' },
-        DiagnosticVirtualTextInfo = { link = 'DiagnosticInfo' },
-        DiagnosticVirtualTextHint = { link = 'DiagnosticHint' },
-        DiagnosticUnderlineError = { undercurl = true, link = 'DiagnosticError' },
-        DiagnosticUnderlineWarn = { undercurl = true, link = 'DiagnosticWarn' },
-        DiagnosticUnderlineInfo = { undercurl = true, link = 'DiagnosticInfo' },
-        DiagnosticUnderlineHint = { undercurl = true, link = 'DiagnosticHint' },
-        -- DiagnosticFloatingError = {},
-        -- DiagnosticFloatingWarn = {},
-        -- DiagnosticFloatingInfo = {},
-        -- DiagnosticFloatingHint = {},
-        -- DiagnosticSignError = {},
-        -- DiagnosticSignWarn = {},
-        -- DiagnosticSignInfo = {},
-        -- DiagnosticSignHint = {},
+        LspReferenceText = { bg = c.bg_highlight },
+        LspReferenceRead = { link = 'LspReferenceText' },
+        LspReferenceWrite = { link = 'LspReferenceText' },
+        LspCodeLens = { fg = c.fg_muted },
+        LspCodeLensSeparator = { fg = c.fg_faint },
+        LspInlayHint = { fg = c.fg_muted, bg = c.bg_line },
+        LspSignatureActiveParameter = { fg = c.accent, bold = true },
 
-        -- Tree-Sitter groups are defined with an "@" symbol, which must be
-        -- specially handled to be valid lua code, we do this via the special
-        -- sym function. The following are all valid ways to call the sym function,
-        -- for more details see https://www.lua.org/pil/5.html
-        --
-        -- sym("@text.literal")
-        -- sym('@text.literal')
-        -- sym"@text.literal"
-        -- sym'@text.literal'
-        --
-        -- For more information see https://github.com/rktjmp/lush.nvim/issues/109
+        ------------------------------------------------------------------------
+        -- Diagnostics
+        ------------------------------------------------------------------------
 
-        ['@markup'] = { fg = colorscheme.mainText },
-        ['@markup.raw'] = { link = 'Property' },
-        -- ["@markup.link"] = {},
-        ['@markup.strong'] = { link = 'Bold' },
-        ['@markup.italic'] = { link = 'Italic' },
-        ['@markup.heading'] = { link = 'Keyword' },
-        ['@markup.link.url'] = {
-            fg = colorscheme.syntaxFunction,
-            sp = colorscheme.syntaxFunction,
-            underline = true,
-        },
-        ['@markup.underline'] = { link = 'Underlined' },
-        ['@symbol'] = { fg = colorscheme.syntaxOperator },
-        ['@comment.todo'] = { link = 'Todo' },
+        DiagnosticError = { fg = c.error },
+        DiagnosticWarn = { fg = c.warning },
+        DiagnosticInfo = { fg = c.info },
+        DiagnosticHint = { fg = c.hint },
+        DiagnosticOk = { fg = c.ok },
 
+        DiagnosticVirtualTextError = { fg = c.error, bg = tint(c.error, 0.10) },
+        DiagnosticVirtualTextWarn = { fg = c.warning, bg = tint(c.warning, 0.10) },
+        DiagnosticVirtualTextInfo = { fg = c.info, bg = tint(c.info, 0.10) },
+        DiagnosticVirtualTextHint = { fg = c.hint, bg = tint(c.hint, 0.10) },
+        DiagnosticVirtualTextOk = { fg = c.ok, bg = tint(c.ok, 0.10) },
+
+        DiagnosticUnderlineError = { undercurl = true, sp = c.error },
+        DiagnosticUnderlineWarn = { undercurl = true, sp = c.warning },
+        DiagnosticUnderlineInfo = { undercurl = true, sp = c.info },
+        DiagnosticUnderlineHint = { undercurl = true, sp = c.hint },
+        DiagnosticUnderlineOk = { undercurl = true, sp = c.ok },
+
+        DiagnosticFloatingError = { link = 'DiagnosticError' },
+        DiagnosticFloatingWarn = { link = 'DiagnosticWarn' },
+        DiagnosticFloatingInfo = { link = 'DiagnosticInfo' },
+        DiagnosticFloatingHint = { link = 'DiagnosticHint' },
+        DiagnosticFloatingOk = { link = 'DiagnosticOk' },
+
+        DiagnosticSignError = { link = 'DiagnosticError' },
+        DiagnosticSignWarn = { link = 'DiagnosticWarn' },
+        DiagnosticSignInfo = { link = 'DiagnosticInfo' },
+        DiagnosticSignHint = { link = 'DiagnosticHint' },
+        DiagnosticSignOk = { link = 'DiagnosticOk' },
+
+        DiagnosticUnnecessary = { fg = c.fg_muted },
+        DiagnosticDeprecated = { strikethrough = true, sp = c.fg_muted },
+
+        ------------------------------------------------------------------------
+        -- Tree-sitter
+        ------------------------------------------------------------------------
+
+        -- Comments
         ['@comment'] = { link = 'Comment' },
-        ['@punctuation'] = { link = 'Punctuation' },
-        ['@punctuation.bracket'] = { fg = colorscheme.warningEmphasis },
-        ['@punctuation.delimiter'] = { fg = colorscheme.syntaxError },
-        ['@punctuation.terminator.statement'] = { link = 'Delimiter' },
-        ['@punctuation.special'] = { fg = colorscheme.syntaxError },
-        ['@punctuation.separator.keyvalue'] = { fg = colorscheme.syntaxError },
+        ['@comment.documentation'] = { link = 'Comment' },
+        ['@comment.todo'] = { link = 'Todo' },
+        ['@comment.note'] = { fg = c.info, bold = true },
+        ['@comment.warning'] = { fg = c.warning, bold = true },
+        ['@comment.error'] = { fg = c.error, bold = true },
 
-        ['@diff.plus'] = { fg = colorscheme.successText },
-        ['@diff.minus'] = { fg = colorscheme.errorText },
-
+        -- Constants & literals
         ['@constant'] = { link = 'Constant' },
-        ['@constant.builtin'] = { link = 'Keyword' },
-        -- ["@constancolorscheme.macro"] = {},
-        -- ["@define"] = {},
-        -- ["@macro"] = {},
+        ['@constant.builtin'] = { link = 'Constant' },
+        ['@constant.macro'] = { link = 'Macro' },
         ['@string'] = { link = 'String' },
-        ['@string.escape'] = { fg = utils.shade(colorscheme.stringText, 0.45) },
-        ['@string.special'] = { fg = utils.shade(colorscheme.syntaxFunction, 0.45) },
-        -- ["@character"] = {},
-        -- ["@character.special"] = {},
+        ['@string.documentation'] = { link = 'String' },
+        ['@string.escape'] = { fg = c.special },
+        ['@string.regexp'] = { fg = c.special },
+        ['@string.special'] = { fg = c.special },
+        ['@string.special.symbol'] = { fg = c.constant },
+        ['@string.special.url'] = { link = '@markup.link.url' },
+        ['@character'] = { link = 'Character' },
+        ['@character.special'] = { fg = c.special },
         ['@number'] = { link = 'Number' },
         ['@boolean'] = { link = 'Boolean' },
-        -- ["@float"] = {},
-        ['@function'] = {
-            link = 'Function',
-            italic = config.italics.functions or false,
-        },
+
+        -- Functions
+        ['@function'] = { link = 'Function' },
         ['@function.call'] = { link = 'Function' },
         ['@function.builtin'] = { link = 'Function' },
-        -- ["@function.macro"] = {},
-        ['@parameter'] = { link = 'Parameter' },
-        ['@method'] = { link = 'Function' },
-        ['@field'] = { link = 'Property' },
-        ['@property'] = { link = 'Property' },
-        ['@constructor'] = { fg = colorscheme.syntaxFunction },
-        -- ["@conditional"] = {},
-        -- ["@repeat"] = {},
+        ['@function.macro'] = { link = 'Macro' },
+        ['@function.method'] = { link = 'Function' },
+        ['@function.method.call'] = { link = 'Function' },
+        ['@constructor'] = { fg = c.type },
+
+        -- Variables, parameters & properties
+        ['@variable'] = { fg = c.fg, italic = config.italics.variables or false },
+        ['@variable.builtin'] = { fg = c.special },
+        ['@variable.member'] = { fg = c.fg },
+        ['@variable.parameter'] = { fg = c.fg, italic = config.italics.variables or false },
+        ['@variable.parameter.builtin'] = { fg = c.special },
+        ['@property'] = { fg = c.fg },
+
+        -- Types & modules
+        ['@type'] = { link = 'Type' },
+        ['@type.builtin'] = { link = 'Type' },
+        ['@type.definition'] = { link = 'Type' },
+        ['@module'] = { link = 'Type' },
+        ['@module.builtin'] = { link = 'Type' },
+        ['@attribute'] = { fg = c.special },
+        ['@attribute.builtin'] = { fg = c.special },
+
+        -- Keywords & operators
+        ['@keyword'] = { link = 'Keyword' },
+        ['@keyword.operator'] = { link = 'Keyword' },
+        ['@keyword.directive'] = { link = 'PreProc' },
         ['@label'] = { link = 'Label' },
         ['@operator'] = { link = 'Operator' },
-        ['@exception'] = { link = 'Exception' },
-        ['@variable'] = {
-            fg = colorscheme.syntaxFunction,
-            italic = config.italics.variables or false,
-        },
-        ['@variable.builtin'] = { fg = colorscheme.syntaxFunction },
-        ['@variable.member'] = { fg = colorscheme.mainText },
-        ['@variable.parameter'] = {
-            fg = colorscheme.mainText,
-            italic = config.italics.variables or false,
-        },
-        ['@type'] = { link = 'Type' },
-        ['@type.definition'] = { fg = colorscheme.mainText },
-        ['@type.builtin'] = { fg = colorscheme.syntaxFunction },
-        ['@type.qualifier'] = { fg = colorscheme.syntaxFunction },
-        ['@keyword'] = { link = 'Keyword' },
-        -- ["@storageclass"] = {},
-        -- ["@structure"] = {},
-        ['@namespace'] = { link = 'Type' },
-        ['@annotation'] = { link = 'Label' },
-        -- ["@include"] = {},
-        -- ["@preproc"] = {},
-        ['@debug'] = { fg = colorscheme.specialKeyword },
+        ['@debug'] = { link = 'Debug' },
+
+        -- Punctuation
+        ['@punctuation'] = { fg = c.fg_dim },
+        ['@punctuation.bracket'] = { fg = c.fg_dim },
+        ['@punctuation.delimiter'] = { fg = c.fg_dim },
+        ['@punctuation.special'] = { fg = c.special },
+        ['@punctuation.separator.keyvalue'] = { fg = c.fg_dim },
+
+        -- Tags
         ['@tag'] = { link = 'Tag' },
         ['@tag.builtin'] = { link = 'Tag' },
-        ['@tag.delimiter'] = { fg = colorscheme.syntaxOperator },
-        ['@tag.attribute'] = { fg = colorscheme.syntaxKeyword },
-        ['@tag.jsx.element'] = { fg = colorscheme.syntaxFunction },
-        ['@attribute'] = { fg = colorscheme.syntaxKeyword },
-        ['@error'] = { link = 'Error' },
-        ['@warning'] = { link = 'WarningMsg' },
-        ['@info'] = { fg = colorscheme.syntaxFunction },
+        ['@tag.attribute'] = { fg = c.special },
+        ['@tag.delimiter'] = { fg = c.fg_dim },
 
-        -- Specific languages
-        -- overrides
-        ['@label.json'] = { link = 'Property' },          -- For json
-        ['@label.help'] = { link = '@markup.link.url' },  -- For help files
-        ['@markup.link.url.html'] = { underline = true }, -- For html
+        -- Markup
+        ['@markup'] = { fg = c.fg },
+        ['@markup.heading'] = { fg = c.accent, bold = true },
+        ['@markup.strong'] = { link = 'Bold' },
+        ['@markup.italic'] = { link = 'Italic' },
+        ['@markup.strikethrough'] = { strikethrough = true },
+        ['@markup.underline'] = { link = 'Underlined' },
+        ['@markup.quote'] = { fg = c.fg_muted, italic = true },
+        ['@markup.math'] = { fg = c.special },
+        ['@markup.list'] = { fg = c.keyword },
+        ['@markup.list.checked'] = { fg = c.ok },
+        ['@markup.list.unchecked'] = { fg = c.fg_muted },
+        ['@markup.raw'] = { fg = c.string },
+        ['@markup.link'] = { fg = c.link },
+        ['@markup.link.label'] = { fg = c.link },
+        ['@markup.link.url'] = { fg = c.link, sp = c.link, underline = true },
 
-        -- semantic highlighting
-        ['@lsp.type.namespace'] = { link = '@namespace' },
-        ['@lsp.type.type'] = { link = '@type' },
+        -- Diff
+        ['@diff.plus'] = { link = 'Added' },
+        ['@diff.minus'] = { link = 'Removed' },
+        ['@diff.delta'] = { link = 'Changed' },
+
+        -- Language-specific overrides
+        ['@label.vimdoc'] = { link = '@markup.link.url' }, -- For help files
+        ['@markup.link.url.html'] = { underline = true },  -- For html
+
+        ------------------------------------------------------------------------
+        -- LSP semantic tokens
+        ------------------------------------------------------------------------
+
         ['@lsp.type.class'] = { link = '@type' },
+        ['@lsp.type.decorator'] = { link = '@attribute' },
         ['@lsp.type.enum'] = { link = '@type' },
-        ['@lsp.type.enumMember'] = { fg = colorscheme.syntaxFunction },
-        ['@lsp.type.interface'] = { link = '@type' },
-        ['@lsp.type.struct'] = { link = '@type' },
-        ['@lsp.type.parameter'] = { link = '@parameter' },
-        ['@lsp.type.property'] = { link = '@text' },
+        ['@lsp.type.enumMember'] = { link = '@constant' },
         ['@lsp.type.function'] = { link = '@function' },
-        ['@lsp.type.method'] = { link = '@method' },
-        ['@lsp.type.macro'] = { link = '@label' },
-        ['@lsp.type.decorator'] = { link = '@label' },
+        ['@lsp.type.interface'] = { link = '@type' },
+        ['@lsp.type.macro'] = { link = '@function.macro' },
+        ['@lsp.type.method'] = { link = '@function.method' },
+        ['@lsp.type.namespace'] = { link = '@module' },
+        ['@lsp.type.parameter'] = { link = '@variable.parameter' },
+        ['@lsp.type.property'] = { link = '@property' },
+        ['@lsp.type.struct'] = { link = '@type' },
+        ['@lsp.type.type'] = { link = '@type' },
+        ['@lsp.type.typeParameter'] = { link = '@type' },
+        ['@lsp.type.variable'] = {},
         ['@lsp.typemod.function.declaration'] = { link = '@function' },
         ['@lsp.typemod.function.readonly'] = { link = '@function' },
+        ['@lsp.typemod.variable.defaultLibrary'] = { link = '@variable.builtin' },
     }
 
     -- integrations
-    groups = vim.tbl_extend('force', groups, cmp.highlights())
+    groups = vim.tbl_extend('force', groups, cmp.highlights(c))
 
     -- overrides
     groups = vim.tbl_extend(
@@ -358,15 +366,13 @@ end
 function theme.setup(values)
     setmetatable(
         config,
-        { __index = vim.tbl_extend('force', config.defaults, values) }
+        { __index = vim.tbl_deep_extend('force', config.defaults, values or {}) }
     )
-
-    theme.bufferline = { highlights = {} }
-    theme.bufferline.highlights = bufferline.highlights(config)
 end
 
-function theme.colorscheme()
-    if vim.version().minor < 10 then
+---@param name? string colorscheme name reported in vim.g.colors_name
+function theme.colorscheme(name)
+    if vim.fn.has 'nvim-0.10' == 0 then
         vim.notify(
             'Neovim 0.10+ is required for the nordwave colorscheme',
             vim.log.levels.ERROR,
@@ -376,16 +382,25 @@ function theme.colorscheme()
     end
 
     vim.api.nvim_command 'hi clear'
-    if vim.fn.exists 'syntax_on' then
+    if vim.fn.exists 'syntax_on' == 1 then
         vim.api.nvim_command 'syntax reset'
     end
 
     vim.g.VM_theme_set_by_colorscheme = true
     vim.o.termguicolors = true
-    vim.g.colors_name = 'nordwave'
+    vim.g.colors_name = name or 'nordwave'
 
-    set_terminal_colors()
-    set_groups()
+    local colors = require('nordwave.colorscheme').get()
+    set_terminal_colors(colors)
+    set_groups(colors)
 end
 
-return theme
+-- `require('nordwave').bufferline.highlights` is built on access, so it works
+-- without calling setup() and always reflects the current background.
+return setmetatable(theme, {
+    __index = function(_, key)
+        if key == 'bufferline' then
+            return { highlights = bufferline.highlights(config) }
+        end
+    end,
+})

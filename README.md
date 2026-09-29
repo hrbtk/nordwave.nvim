@@ -12,6 +12,11 @@
 
 </div>
 
+## Requirements
+
+- Neovim 0.10+
+- `termguicolors` (enabled automatically by the colorscheme)
+
 ## Installation
 
 1. Using `Lazy`:
@@ -29,18 +34,25 @@ use 'hrbtk/nordwave.nvim'
 3. Using `vim.pack()`:
 
 ```lua
-vim.pack.add("https://github.com/hrbtk/nordwave.nvim")
+vim.pack.add({ "https://github.com/hrbtk/nordwave.nvim" })
 ```
+
+## Usage
+
+```lua
+vim.cmd.colorscheme('nordwave')
+```
+
+Nord Wave is a dark colorscheme: `nordwave` and `nordwave-dark` both set `background=dark`. A light variant is not available yet.
+
+`require('nordwave').colorscheme()` applies the colors without changing `background`.
 
 ## Configuration
 
-To configure the plugin, you can call require('nordwave').setup({}), passing the table with the values in it. The following are the **defaults**:
+To configure the plugin, call `require('nordwave').setup({})` **before** applying the colorscheme. Options you pass are merged with the defaults, so you only need to specify what you want to change. The following are the **defaults**:
 
 ```lua
 require('nordwave').setup({
-    -- NOTE: if your configuration sets vim.o.background in your configuration for Neovim,
-    -- the following setting will do nothing, since it'll be overriden.
-    theme = 'dark', -- String: 'dark' or 'light', determines the colorscheme used
     transparent = false, -- Boolean: Sets the background to transparent
     italics = {
         comments = true, -- Boolean: Italicizes comments
@@ -48,16 +60,34 @@ require('nordwave').setup({
         functions = true, -- Boolean: Italicizes functions
         strings = true, -- Boolean: Italicizes strings
         variables = true, -- Boolean: Italicizes variables
+        bufferline = false, -- Boolean: Italicizes some bufferline.nvim elements
     },
     overrides = {}, -- A dictionary of group names, can be a function returning a dictionary or a table.
 })
 ```
 
-- **The `colorscheme()` function**
+Example of `overrides`:
 
-This function can be used to set the colorscheme in your editor, however, if it doesn't work for you, you can always use `vim.cmd.colorscheme('nordwave')`.
+```lua
+require('nordwave').setup({
+    overrides = {
+        Comment = { fg = '#7a808c', italic = true },
+        ['@variable'] = { link = 'Identifier' },
+    },
+})
+```
 
 ### Specifics for Some Plugins
+
+#### lualine.nvim
+
+A [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim) theme is included. It is picked up automatically with `theme = 'auto'`, or can be set explicitly:
+
+```lua
+require('lualine').setup({
+    options = { theme = 'nordwave' },
+})
+```
 
 #### Bufferline.nvim
 
@@ -68,6 +98,10 @@ require('bufferline').setup({
     highlights = require('nordwave').bufferline.highlights,
 })
 ```
+
+#### nvim-cmp
+
+[nvim-cmp](https://github.com/hrsh7th/nvim-cmp) highlight groups are applied automatically.
 
 ## Credits
 

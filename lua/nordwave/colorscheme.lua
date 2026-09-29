@@ -1,7 +1,11 @@
-local config = require 'nordwave.config'
+local M = {}
 
--- Nord Wave Palette
-local nordwave = {
+-- Upstream Nord Wave palette (iTerm2-Color-Schemes, "Nord Wave.json")
+M.nordwave = {
+  background = "#212121",
+  foreground = "#d8dee9",
+  cursorColor = "#ebcb8b",
+  selectionBackground = "#d8dee9",
   black = "#3b4252",
   red = "#bf616a",
   green = "#a3be8c",
@@ -10,7 +14,6 @@ local nordwave = {
   purple = "#b48ead",
   cyan = "#88c0d0",
   white = "#e5e9f0",
-  midBlack = "#2a2a2a",
   brightBlack = "#4c566a",
   brightRed = "#bf616a",
   brightGreen = "#a3be8c",
@@ -19,59 +22,82 @@ local nordwave = {
   brightPurple = "#b48ead",
   brightCyan = "#8fbcbb",
   brightWhite = "#eceff4",
-  background = "#212121",
-  foreground = "#d8dee9",
-  cursorColor = "#ebcb8b",
-  selectionBackground = "#d8dee9"
 }
 
-local colorscheme = {
-  standardWhite = nordwave.brightWhite,
-  standardBlack = nordwave.background,
+-- Editor palettes: upstream colors plus neutral shades derived from the
+-- charcoal background, so UI surfaces stay warm instead of Nord's blue-gray.
+M.palettes = {
+  dark = vim.tbl_extend('error', M.nordwave, {
+    -- neutral surfaces, lightest last
+    bg_line = "#282828",
+    bg_alt = "#2b2b2b",
+    bg_highlight = "#3a3a3a",
+    border = "#474747",
+
+    -- neutral text shades, brightest first
+    fg_dim = "#9aa0aa",
+    fg_muted = "#6b717d",
+    fg_subtle = "#56595f",
+    fg_faint = "#3f3f3f",
+  }),
+  -- light = {}, -- Light variant disabled for now, see M.get()
 }
 
-if vim.o.background == 'light' then
-  -- Add your light theme mapping here...
-else
-  -- UI Backgrounds
-  colorscheme.editorBackground = config.transparent and 'none' or nordwave.background
-  colorscheme.sidebarBackground = nordwave.black
-  colorscheme.popupBackground = nordwave.brightBlack
-  colorscheme.floatingWindowBackground = nordwave.black
-  colorscheme.menuOptionBackground = nordwave.black
-  colorscheme.cursorLineBackground = nordwave.midBlack
+---@param background? 'dark'|'light' defaults to vim.o.background
+function M.get(background)
+  -- Light variant disabled for now; restore this line to select by background:
+  -- local p = M.palettes[background or vim.o.background] or M.palettes.dark
+  local _ = background
+  local p = M.palettes.dark
 
-  -- Foreground & Text Grays
-  colorscheme.mainText = nordwave.foreground
-  colorscheme.emphasisText = nordwave.brightWhite
-  colorscheme.commandText = nordwave.white
-  colorscheme.inactiveText = nordwave.brightBlack
-  colorscheme.disabledText = nordwave.black
-  colorscheme.lineNumberText = nordwave.brightBlack
-  colorscheme.selectedText = nordwave.selectionBackground
-  colorscheme.inactiveSelectionText = nordwave.brightBlack
-  colorscheme.foregroundEmphasis = nordwave.brightWhite
-  colorscheme.terminalGray = nordwave.brightBlack
+  return {
+    terminal = {
+      p.black, p.red, p.green, p.yellow, p.blue, p.purple, p.cyan, p.white,
+      p.brightBlack, p.brightRed, p.brightGreen, p.brightYellow,
+      p.brightBlue, p.brightPurple, p.brightCyan, p.brightWhite,
+    },
 
-  -- Borders
-  colorscheme.windowBorder = nordwave.black
-  colorscheme.focusedBorder = nordwave.brightBlack
-  colorscheme.emphasizedBorder = nordwave.cyan -- Cyan makes a great active border color in Nord
+    -- Surfaces
+    bg = p.background,
+    bg_alt = p.bg_alt,             -- floats, popup menu, sidebars, tabline
+    bg_line = p.bg_line,           -- cursorline, colorcolumn
+    bg_highlight = p.bg_highlight, -- selected menu item, folds, references
+    border = p.border,
 
-  -- Syntax & Diagnostics
-  colorscheme.syntaxFunction = nordwave.blue
-  colorscheme.syntaxKeyword = nordwave.purple
-  colorscheme.specialKeyword = nordwave.brightCyan
-  colorscheme.stringText = nordwave.green
-  colorscheme.commentText = nordwave.brightBlack
-  colorscheme.syntaxOperator = nordwave.white
-  colorscheme.linkText = nordwave.cyan
+    -- Text
+    fg = p.foreground,
+    fg_emphasis = p.brightWhite,
+    fg_dim = p.fg_dim,       -- punctuation, operators
+    fg_muted = p.fg_muted,   -- comments, inactive text
+    fg_subtle = p.fg_subtle, -- line numbers
+    fg_faint = p.fg_faint,   -- whitespace, non-text
 
-  colorscheme.errorText = nordwave.red
-  colorscheme.syntaxError = nordwave.brightRed
-  colorscheme.warningText = nordwave.yellow
-  colorscheme.warningEmphasis = nordwave.brightYellow
-  colorscheme.successText = nordwave.green
+    -- Accents
+    cursor = p.cursorColor,
+    selection = p.selectionBackground,
+    accent = p.yellow,
+
+    -- Syntax
+    keyword = p.purple,
+    func = p.blue,
+    type = p.yellow,
+    string = p.green,
+    constant = p.cyan,
+    special = p.brightCyan,
+    link = p.cyan,
+
+    -- Diagnostics
+    error = p.red,
+    warning = p.yellow,
+    info = p.blue,
+    hint = p.cyan,
+    ok = p.green,
+
+    -- Diff
+    added = p.green,
+    changed = p.blue,
+    removed = p.red,
+  }
 end
 
-return colorscheme
+return M

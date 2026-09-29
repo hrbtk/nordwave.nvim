@@ -1,0 +1,2 @@
+-- Light variant disabled for now (no light palette in nordwave.colorscheme).
+-- return require('nordwave.integrations.lualine').theme('light')
