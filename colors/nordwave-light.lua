@@ -1,3 +1,0 @@
--- Light variant disabled for now (no light palette in nordwave.colorscheme).
--- vim.o.background = "light"
--- require("nordwave").colorscheme("nordwave-light")

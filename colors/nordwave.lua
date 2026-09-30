@@ -1,3 +1,9 @@
--- Light variant disabled for now; remove this line to follow vim.o.background again.
-vim.o.background = "dark"
-require("nordwave").colorscheme("nordwave")
+vim.cmd.hi("clear")
+if vim.g.syntax_on ~= nil then
+  vim.cmd.syntax("reset")
+end
+
+vim.o.termguicolors = true
+vim.g.colors_name = "nordwave"
+
+require("nordwave").setup()
