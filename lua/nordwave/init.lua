@@ -1,8 +1,7 @@
 local M = {}
-local palette = require("nordwave.palette").ui
+local palettes = require("nordwave.palette").ui
 local utils = require("nordwave.utils")
 
--- Default configuration merged internally
 local config = {
   transparent = false,
   italics = {
@@ -15,8 +14,7 @@ local config = {
   overrides = {},
 }
 
-local function set_groups()
-  local c = palette
+local function set_groups(c)
   local bg = config.transparent and "NONE" or c.background
   local tint = function(color, alpha) return utils.mix(color, c.background, alpha) end
 
@@ -130,7 +128,6 @@ local function set_groups()
     DiffText = { bg = tint(c.blue, 0.35) },
   }
 
-  -- Apply overrides if any
   groups = vim.tbl_extend("force", groups, type(config.overrides) == "function" and config.overrides() or config.overrides)
 
   for group, parameters in pairs(groups) do
@@ -147,17 +144,20 @@ function M.setup(opts)
   config = vim.tbl_deep_extend("force", config, opts or {})
 
   -- Set Terminal Colors
+  local bg_opt = vim.o.background or "dark"
+  local c = palettes[bg_opt] or palettes.dark
+
   local term_colors = {
-    palette.black, palette.red, palette.green, palette.yellow, palette.blue, palette.purple, palette.cyan, palette.white,
-    palette.brightBlack, palette.brightRed, palette.brightGreen, palette.brightYellow, palette.brightBlue, palette.brightPurple, palette.brightCyan, palette.brightWhite,
+    c.black, c.red, c.green, c.yellow, c.blue, c.purple, c.cyan, c.white,
+    c.brightBlack, c.brightRed, c.brightGreen, c.brightYellow, c.brightBlue, c.brightPurple, c.brightCyan, c.brightWhite,
   }
   for i, color in ipairs(term_colors) do
     vim.g["terminal_color_" .. (i - 1)] = color
   end
-  vim.g.terminal_color_background = palette.background
-  vim.g.terminal_color_foreground = palette.foreground
+  vim.g.terminal_color_background = c.background
+  vim.g.terminal_color_foreground = c.foreground
 
-  set_groups()
+  set_groups(c)
 end
 
 return M
